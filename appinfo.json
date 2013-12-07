@@ -1,0 +1,28 @@
+{
+  "uuid": "90c900ff-ef3d-48b2-9d74-de30df867066",
+  "shortName": "Bit Face",
+  "longName": "Bit Face",
+  "companyName": "Tory Gaurnier",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {},
+  "resources": {
+    "media": [
+		{
+			"menuIcon": true,
+			"name": "IMAGE_MENU_ICON",
+			"type": "png",
+			"file": "images/menu_icon_binary_watch.png"
+		},
+
+		{
+			"name": "MY_FONT_16",
+			"type": "font",
+			"file": "fonts/Ubuntu-B.ttf"
+		}
+    ]
+  }
+}
