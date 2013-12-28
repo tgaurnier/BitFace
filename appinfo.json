@@ -4,7 +4,7 @@
   "longName": "Bit Face",
   "companyName": "Tory Gaurnier",
   "versionCode": 1,
-  "versionLabel": "1.0.0",
+  "versionLabel": "1.0.1",
   "watchapp": {
     "watchface": true
   },
@@ -17,9 +17,23 @@
 			"type": "png",
 			"file": "images/menu_icon_binary_watch.png"
 		},
-
 		{
-			"name": "MY_FONT_16",
+			"name": "BATTERY_OUTLINE",
+			"type": "png",
+			"file": "images/battery_outline.png"
+		},
+		{
+			"name": "BATTERY_CHARGE",
+			"type": "png",
+			"file": "images/battery_charge.png"
+		},
+		{
+			"name": "FONT_16",
+			"type": "font",
+			"file": "fonts/Ubuntu-B.ttf"
+		},
+		{
+			"name": "FONT_10",
 			"type": "font",
 			"file": "fonts/Ubuntu-B.ttf"
 		}

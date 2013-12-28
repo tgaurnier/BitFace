@@ -23,7 +23,15 @@
 
 Window *window;
 Layer *display_layer;
-TextLayer *text_layer;
+TextLayer *date_layer;
+TextLayer *percent_layer;
+BitmapLayer *battery_layer;
+BitmapLayer *charge_layer;
+InverterLayer *battfill_layer;
+GBitmap *battery_outline;
+GBitmap *battery_charge;
+GFont font;
+GFont font_tiny;
 
 // Define circle and cell sizes
 #define CIRCLE_RADIUS 					12
@@ -45,7 +53,10 @@ TextLayer *text_layer;
 #define HOURS_FIRST_DIGIT_MAX_ROWS		1 + clock_is_24h_style() // 2 rows if 24 hour time
 #define MINUTES_FIRST_DIGIT_MAX_ROWS	3
 
-void draw_cell(GContext* context, GPoint center, bool filled) {
+static char percent_str[] = "xxx%";
+
+
+static void draw_cell(GContext* context, GPoint center, bool filled) {
 	// Each cell is a bit
 	graphics_context_set_fill_color(context, GColorWhite);
 	graphics_fill_circle(context, center, CIRCLE_RADIUS);
@@ -58,7 +69,7 @@ void draw_cell(GContext* context, GPoint center, bool filled) {
 }
 
 
-GPoint get_center_point_from_cell_location(unsigned short x, unsigned short y) {
+static GPoint get_center_point_from_cell_location(unsigned short x, unsigned short y) {
 	return GPoint(
 		SIDE_PADDING + (CELL_SIZE / 2) + (CELL_SIZE * x),
 		TOP_PADDING + (CELL_SIZE / 2) + (CELL_SIZE * y)
@@ -69,7 +80,7 @@ GPoint get_center_point_from_cell_location(unsigned short x, unsigned short y) {
 /**
  * Converts decimal into binary decimal form, then draws bits in cells
  */
-void draw_col(GContext* ctx, unsigned short digit, unsigned short max_rows, unsigned short col) {
+static void draw_col(GContext* ctx, unsigned short digit, unsigned short max_rows, unsigned short col) {
 	for(int i = 0; i < max_rows; i++)
 		draw_cell(ctx, get_center_point_from_cell_location(col, i), (digit >> i) & 0x1);
 }
@@ -78,7 +89,7 @@ void draw_col(GContext* ctx, unsigned short digit, unsigned short max_rows, unsi
 /**
  * Converts 24hr to 12hr
  */
-unsigned short to_12_hour(unsigned short hour) {
+static unsigned short to_12_hour(unsigned short hour) {
 	unsigned short display_hour = hour % 12;
 
 	// If display_hour is 0, then set as 12
@@ -86,7 +97,7 @@ unsigned short to_12_hour(unsigned short hour) {
 }
 
 
-void display_layer_update_callback(Layer *me, GContext* context) {
+static void display_layer_update_callback(Layer *me, GContext* context) {
 	time_t now			=	time(NULL);
 	struct tm *t		=	localtime(&now);
 	unsigned short hour	=	t->tm_hour;
@@ -133,13 +144,69 @@ void display_layer_update_callback(Layer *me, GContext* context) {
 }
 
 
-void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(display_layer);
+static void hide_battery() {
+	layer_set_hidden(bitmap_layer_get_layer(battery_layer), true);
+	layer_set_hidden(text_layer_get_layer(percent_layer), true);
+	layer_set_hidden(inverter_layer_get_layer(battfill_layer), true);
+}
 
-	static char date_text[] = "Xxxxxxxxx\n00/00/00";
 
-	strftime(date_text, sizeof(date_text), "%A\n%m/%d/%y", tick_time);
-	text_layer_set_text(text_layer, date_text);
+static void show_battery() {
+	layer_set_hidden(bitmap_layer_get_layer(battery_layer), false);
+	layer_set_hidden(text_layer_get_layer(percent_layer), false);
+	layer_set_hidden(inverter_layer_get_layer(battfill_layer), false);
+}
+
+
+static void set_battery(BatteryChargeState state) {
+	// Set battery percent layer, account for bug where state.charge_percent never gets above 90
+	if(state.is_plugged && !state.is_charging && state.charge_percent == 90)
+		snprintf(percent_str, sizeof(percent_str), "100%%");
+	else
+		snprintf(percent_str, sizeof(percent_str), "%d%%", (int)state.charge_percent);
+	text_layer_set_text(percent_layer, percent_str);
+
+	// Set battery fill layer
+	layer_set_frame(
+		inverter_layer_get_layer(battfill_layer),
+		GRect(8, 136, state.charge_percent/5, 16)
+	);
+
+	// Show or hide charging icon
+	if(state.is_plugged)
+		layer_set_hidden(bitmap_layer_get_layer(charge_layer), false);
+	else
+		layer_set_hidden(bitmap_layer_get_layer(charge_layer), true);
+
+	// Show or hide battery indicator
+	if(state.is_plugged || state.charge_percent <= 30)
+		show_battery();
+	else
+		hide_battery();
+}
+
+
+static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
+	static uint8_t count = 1;
+	if(count == 1) {
+		layer_mark_dirty(display_layer);
+
+		static char date_text[] = "Xxxxxxxxx\n00/00/00";
+
+		strftime(date_text, sizeof(date_text), "%A\n%m/%d/%y", tick_time);
+		text_layer_set_text(date_layer, date_text);
+	}
+
+	else if(count == 5) {
+		BatteryChargeState state = battery_state_service_peek();
+		if(!(state.is_plugged || state.charge_percent <= 30))
+			hide_battery();
+	}
+
+	else if(count == 60)
+		count = 0;
+
+	count++;
 }
 
 static void init(void) {
@@ -149,24 +216,74 @@ static void init(void) {
 	Layer *root_layer = window_get_root_layer(window);
 	GRect frame = layer_get_frame(root_layer);
 
+	// Init fonts and images
+	font			=	fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_16));
+	font_tiny		=	fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_10));
+	battery_outline	=	gbitmap_create_with_resource(RESOURCE_ID_BATTERY_OUTLINE);
+	battery_charge	=	gbitmap_create_with_resource(RESOURCE_ID_BATTERY_CHARGE);
+
 	// Init layer for display
 	display_layer = layer_create(frame);
 	layer_set_update_proc(display_layer, &display_layer_update_callback);
 	layer_add_child(root_layer, display_layer);
 
 	// Init layer for text
-	GFont font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_MY_FONT_16));
-	text_layer = text_layer_create(frame);
-	layer_set_frame((Layer*)text_layer, GRect(0, 130, 144, 168-130));
-	text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-	layer_add_child(root_layer, (Layer*)text_layer);
-	text_layer_set_font(text_layer, font);
+	date_layer = text_layer_create(frame);
+	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
+	layer_set_bounds(text_layer_get_layer(date_layer), GRect(0, 0, 144, 168-130));
+	text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
+	text_layer_set_font(date_layer, font);
+	layer_add_child(root_layer, text_layer_get_layer(date_layer));
 
-	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
+	// Init layer for battery image
+	battery_layer = bitmap_layer_create(frame);
+	bitmap_layer_set_background_color(battery_layer, GColorClear);
+	layer_set_frame(bitmap_layer_get_layer(battery_layer), GRect(4, 134, 30, 20));
+	layer_set_bounds(bitmap_layer_get_layer(battery_layer), GRect(0, 0, 30, 20));
+	bitmap_layer_set_bitmap(battery_layer, battery_outline);
+	layer_add_child(root_layer, bitmap_layer_get_layer(battery_layer));
+
+	// Init layer for charge image
+	charge_layer = bitmap_layer_create(frame);
+	bitmap_layer_set_background_color(charge_layer, GColorClear);
+	layer_set_frame(bitmap_layer_get_layer(charge_layer), GRect(8, 136, 20, 16));
+	layer_set_bounds(bitmap_layer_get_layer(charge_layer), GRect(0, 0, 20, 16));
+	bitmap_layer_set_bitmap(charge_layer, battery_charge);
+	layer_add_child(root_layer, bitmap_layer_get_layer(charge_layer));
+
+	// Init battery fill layer
+	battfill_layer = inverter_layer_create(frame);
+	layer_set_frame(inverter_layer_get_layer(battfill_layer), GRect(8, 136, 0, 16));
+	layer_add_child(root_layer, inverter_layer_get_layer(battfill_layer));
+
+	// Init layer for battery percentage
+	percent_layer = text_layer_create(frame);
+	layer_set_frame(text_layer_get_layer(percent_layer), GRect(4, 154, 30, 14));
+	layer_set_bounds(text_layer_get_layer(percent_layer), GRect(0, 0, 30, 14));
+	text_layer_set_text_alignment(percent_layer, GTextAlignmentCenter);
+	text_layer_set_font(percent_layer, font_tiny);
+	layer_add_child(root_layer, text_layer_get_layer(percent_layer));
+
+	battery_state_service_subscribe(set_battery);
+	set_battery(battery_state_service_peek());
+	show_battery();
+
+	tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
 }
 
 static void deinit(void) {
 	layer_destroy(display_layer);
+	text_layer_destroy(date_layer);
+	text_layer_destroy(percent_layer);
+	bitmap_layer_destroy(battery_layer);
+	bitmap_layer_destroy(charge_layer);
+	inverter_layer_destroy(battfill_layer);
+	fonts_unload_custom_font(font);
+	fonts_unload_custom_font(font_tiny);
+	gbitmap_destroy(battery_outline);
+	gbitmap_destroy(battery_charge);
+	tick_timer_service_unsubscribe();
+	battery_state_service_unsubscribe();
 	window_destroy(window);
 }
 
