@@ -179,7 +179,7 @@ static void set_battery(BatteryChargeState state) {
 		layer_set_hidden(bitmap_layer_get_layer(charge_layer), true);
 
 	// Show or hide battery indicator
-	if(state.is_plugged || state.charge_percent <= 30)
+	if(state.is_plugged || state.charge_percent <= 20)
 		show_battery();
 	else
 		hide_battery();
@@ -199,7 +199,7 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 
 	else if(count == 5) {
 		BatteryChargeState state = battery_state_service_peek();
-		if(!(state.is_plugged || state.charge_percent <= 30))
+		if(!(state.is_plugged || state.charge_percent <= 20))
 			hide_battery();
 	}
 
