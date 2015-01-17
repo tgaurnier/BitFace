@@ -81,7 +81,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 //     t = dict_read_next(iterator);
 //   }
   
-  config_changed_callback(iterator);
+//   config_changed_callback(iterator);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
