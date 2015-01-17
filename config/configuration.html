@@ -23,7 +23,7 @@
 
 <!-- Invert Colours Switch  -->
       <div data-role="fieldcontain">
-	<label for="invert-colours">Invert Colours:</label>
+	<label for="invert-colours">Invert Colours :</label>
 	<select name="invert-colours" id="invert-colours" data-role="slider">
 	  <option value="off">Off</option>
 	  <option value="on">On</option>
@@ -32,7 +32,7 @@
 
 <!--       Date Formatter selector -->
       <fieldset class="ui-field-contain">
-        <label for="date-format">Date Format</label>
+        <label for="date-format">Date Format :</label>
         <select name="date-format" id="date-format">
           <option value="dmyyyy">31/1/2015</option>
           <option value="ddmmyyyy">31/01/2015</option>
@@ -44,7 +44,26 @@
           <option value="mmddyyyy">01/31/2015</option>
         </select>
       </fieldset>
+      
+      <!--       Battery hide interval selector -->
+      <fieldset class="ui-field-contain">
+        <label for="battery-hide">Show battery for :</label>
+        <select name="battery-hide" id="battery-hide">
+          <option value="0">Do not show</option>
+          <option value="1">1 second</option>
+          <option value="2">2 seconds</option>
+          <option value="5">5 seconds</option>
+          <option value="10">10 seconds</option>
+          <option value="15">15 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="-1">Do not hide</option>
+        </select>
+      </fieldset>
+      
+      
     </div>
+    
+
 
 <!--     <div data-role="footer"> -->
 <!--       <h1>Insert Footer Text Here</h1> -->
@@ -62,8 +81,9 @@
   <script>
     function saveOptions() {
       var options = {
-	'invert-colours': $("#invert-colours").val()
-	'date-format': $("date-format").val()
+	'invert-colours': $("#invert-colours").val(),
+	'date-format': $("#date-format").val(),
+	'battery-hide': $("#battery-hide").val()
       }
       return options;
     }
@@ -80,11 +100,21 @@
       if (dateFormat) {
 	$('date-format').html(dateFormat);
       }
+      
+      var batteryHide = getURLVariable('battery-hide');
+      batteryHide = decodeURI(batteryHide);
+      if (batteryHide) {
+	$('battery-hide').html(batteryHide);
+      }
+      return;
     }
 
     $(document).ready(function() {
 
+    console.log("in ready function");
       populateConfig();
+    
+    console.log("popluateConfig completed");
       
       $("#b-cancel").click(function() {
 	document.location = "pebblejs://close";
@@ -96,6 +126,7 @@
       });
     });
 
+//    TODO: Need some proper method for this. Swictch to JSON for input to HTML
     function getURLVariable(name) {
       name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
       var regexS = "[\\?&]"+name+"=([^&#]*)",

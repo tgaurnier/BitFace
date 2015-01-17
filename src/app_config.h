@@ -19,7 +19,7 @@ typedef enum
 struct config
 {
   bool coloursInverted;
-  enum DateFormatter dateFomat;
+  DateFormatter dateFomat;
   
 };
 
