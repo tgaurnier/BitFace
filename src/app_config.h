@@ -4,7 +4,7 @@
   
 void *config_changed_callback(DictionaryIterator *config_iterator);
 
-enum dateFormatter
+typedef enum
 {
   dmyyyy,
   ddmmyyyy,
@@ -14,12 +14,12 @@ enum dateFormatter
   mmmdyyyy,
   mdyyyy,
   mmddyyyy,
-};
+} DateFormatter;
 
 struct config
 {
   bool coloursInverted;
-  enum dateFormatter dateFomat;
+  enum DateFormatter dateFomat;
   
 };
 
@@ -45,7 +45,7 @@ void get_date_formatter(char *buffer)
 {
   switch(app_config.dateFomat)
   {
-    case dateFormatter.dmyyyy :
+    case dmyyyy :
       
       break;
       
