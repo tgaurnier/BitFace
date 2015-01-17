@@ -19,10 +19,12 @@ Pebble.addEventListener('showConfiguration', function(e) {
 Pebble.addEventListener('webviewclosed',
 function(e) {
     console.log('Configuration window returned: ' + e.response);
-    
+    var configuration = JSON.parse(decodeURIComponent(e.response));
       // Construct a dictionary
   var dict = {
-    'KEY_DATA':'Hello from PebbleKit JS!'
+    'KEY_INVERT' : configuration.invert-colours,
+    'KEY_DATE_FORMAT' : configuration.date-format,
+    'KEY_BATTERY_HIDE' : configuration.battery-hide
   };
 
   console.log(dict);

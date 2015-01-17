@@ -58,6 +58,8 @@ void get_date_formatter(char *buffer)
 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  
+  APP_LOG(APP_LOG_LEVEL_INFO, "Message received");
 //   // Get the first pair
 //   Tuple *t = dict_read_first(iterator);
 

@@ -4,12 +4,25 @@
 <title>BitFace Configuration</title>
   <!-- Include meta tag to ensure proper rendering and touch zooming -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+      <style type="text/css">
+#footer {
+width:100%;
+height:auto;
+position:absolute;
+bottom:0;
+left:0;
+}
+    </style>
+    
   <!-- Include jQuery Mobile stylesheets -->
   <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
   <!-- Include the jQuery library -->
   <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
   <!-- Include the jQuery Mobile library -->
   <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  
+
 </head>
 <body>
 
@@ -67,14 +80,14 @@
 
 <!--     <div data-role="footer"> -->
 <!--       <h1>Insert Footer Text Here</h1> -->
-      
+<!--       <div id="footer"> -->
 	<div class="ui-body ui-body-b">
           <fieldset class="ui-grid-a">
               <div class="ui-block-a"><div aria-disabled="false" class="ui-submit ui-btn ui-btn-up-d ui-shadow ui-btn-corner-all" data-disabled="false" data-theme="d" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true"><button data-disabled="false" class="ui-btn-hidden" type="submit" data-theme="d" id="b-cancel">Cancel</button></div></div>
               <div class="ui-block-b"><div aria-disabled="false" class="ui-submit ui-btn ui-shadow ui-btn-corner-all ui-btn-up-a" data-disabled="false" data-theme="a" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true"><button data-disabled="false" class="ui-btn-hidden" type="submit" data-theme="a" id="b-submit">Submit</button></div></div>
 	  </fieldset>
         </div>
-        
+<!--         </div> -->
 <!--     </div> -->
   </div> 
 
@@ -111,10 +124,10 @@
 
     $(document).ready(function() {
 
-    console.log("in ready function");
+//     console.log("in ready function");
       populateConfig();
     
-    console.log("popluateConfig completed");
+//     console.log("popluateConfig completed");
       
       $("#b-cancel").click(function() {
 	document.location = "pebblejs://close";

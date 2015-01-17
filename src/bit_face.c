@@ -175,7 +175,7 @@ static void set_battery(BatteryChargeState state) {
 
 	// Show or hide charging icon
 	if(state.is_plugged)
-		layer_set_hidden(bitmap_layer_get_layer(charge_layer), false);
+		layer_set_hidden (bitmap_layer_get_layer(charge_layer), false);
 	else
 		layer_set_hidden(bitmap_layer_get_layer(charge_layer), true);
 
