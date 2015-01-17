@@ -1,30 +1,21 @@
 {
     "appKeys": {
-        "KEY_DATA": 5
+        "KEY_BATTERY_HIDE": 2,
+        "KEY_DATE_FORMAT": 1,
+        "KEY_INVERT": 0
     },
     "capabilities": [
         "configurable"
     ],
-    "companyName": "Tory Gaurnier",
+    "companyName": "Tory Gaurnier & Renjith I S",
     "longName": "Bit Face",
     "projectType": "native",
     "resources": {
         "media": [
             {
-                "file": "images/menu_icon_binary_watch.png",
-                "menuIcon": true,
-                "name": "IMAGE_MENU_ICON",
+                "file": "images/battery_outline.png",
+                "name": "BATTERY_OUTLINE",
                 "type": "png"
-            },
-            {
-                "file": "fonts/Ubuntu-B.ttf",
-                "name": "FONT_10",
-                "type": "font"
-            },
-            {
-                "file": "fonts/Ubuntu-B.ttf",
-                "name": "FONT_16",
-                "type": "font"
             },
             {
                 "file": "images/battery_charge.png",
@@ -32,8 +23,19 @@
                 "type": "png"
             },
             {
-                "file": "images/battery_outline.png",
-                "name": "BATTERY_OUTLINE",
+                "file": "fonts/Ubuntu-B.ttf",
+                "name": "FONT_16",
+                "type": "font"
+            },
+            {
+                "file": "fonts/Ubuntu-B.ttf",
+                "name": "FONT_10",
+                "type": "font"
+            },
+            {
+                "file": "images/menu_icon_binary_watch.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
                 "type": "png"
             }
         ]
