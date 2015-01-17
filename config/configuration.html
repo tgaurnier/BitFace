@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>BitFace Configuration</title>
   <!-- Include meta tag to ensure proper rendering and touch zooming -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Include jQuery Mobile stylesheets -->
@@ -20,14 +21,29 @@
     <div data-role="main" class="ui-content">
 <!--       <p>Insert Content Here</p> -->
 
-	  <div data-role="fieldcontain">
-	    <label for="invert-colours">Invert Colours:</label>
-	    <select name="invert-colours" id="invert-colours" data-role="slider">
-	      <option value="off">Off</option>
-	      <option value="on">On</option>
-	    </select>
-	  </div>
+<!-- Invert Colours Switch  -->
+      <div data-role="fieldcontain">
+	<label for="invert-colours">Invert Colours:</label>
+	<select name="invert-colours" id="invert-colours" data-role="slider">
+	  <option value="off">Off</option>
+	  <option value="on">On</option>
+	</select>
+      </div>
 
+<!--       Date Formatter selector -->
+      <fieldset class="ui-field-contain">
+        <label for="date-format">Date Format</label>
+        <select name="date-format" id="date-format">
+          <option value="dmyyyy">31/1/2015</option>
+          <option value="ddmmyyyy">31/01/2015</option>
+          <option value="dm">31 Jan</option>
+          <option value="dmyyyy">31 Jan 2015</option>
+          <option value="md">Jan 31</option>
+          <option value="mdyyyy">Jan 31 2015</option>
+          <option value="mdyyyy">1/31/2015</option>
+          <option value="mmddyyyy">01/31/2015</option>
+        </select>
+      </fieldset>
     </div>
 
 <!--     <div data-role="footer"> -->
@@ -37,8 +53,7 @@
           <fieldset class="ui-grid-a">
               <div class="ui-block-a"><div aria-disabled="false" class="ui-submit ui-btn ui-btn-up-d ui-shadow ui-btn-corner-all" data-disabled="false" data-theme="d" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true"><button data-disabled="false" class="ui-btn-hidden" type="submit" data-theme="d" id="b-cancel">Cancel</button></div></div>
               <div class="ui-block-b"><div aria-disabled="false" class="ui-submit ui-btn ui-shadow ui-btn-corner-all ui-btn-up-a" data-disabled="false" data-theme="a" data-wrapperels="span" data-iconshadow="true" data-shadow="true" data-corners="true"><button data-disabled="false" class="ui-btn-hidden" type="submit" data-theme="a" id="b-submit">Submit</button></div></div>
-            </fieldset>
-          </div>
+	  </fieldset>
         </div>
         
 <!--     </div> -->

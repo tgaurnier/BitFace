@@ -1,5 +1,5 @@
 
-var CONFIG_URL = "http://google.com"
+var CONFIG_URL = "https://dl.dropboxusercontent.com/u/38622080/pebbleconfigs/BitFace/configuration.html"
 
 Pebble.addEventListener('ready',
   function(e) {

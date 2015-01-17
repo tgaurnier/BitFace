@@ -4,6 +4,56 @@
   
 void *config_changed_callback(DictionaryIterator *config_iterator);
 
+enum dateFormatter
+{
+  dmyyyy,
+  ddmmyyyy,
+  dm,
+  dmyyyy,
+  md,
+  mdyyyy,
+  mdyyyy,
+  mmddyyyy,
+};
+
+struct config
+{
+  bool coloursInverted;
+  enum dateFormatter dateFomat;
+  
+};
+
+static struct config app_config;
+
+GColor get_foreground_colour()
+{
+  if(app_config.coloursInverted)
+    return GColorBlack;
+  else
+    return GColorWhite;
+}
+
+GColor get_background_colour()
+{
+  if(app_config.coloursInverted)
+    return GColorWhite;
+  else
+    return GColorBlack;
+}
+
+void get_date_formatter(char *buffer)
+{
+  switch(app_config.dateFomat)
+  {
+    case dateFormatter.dmyyyy :
+      
+      break;
+      
+  }
+}
+
+
+
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
 //   // Get the first pair
 //   Tuple *t = dict_read_first(iterator);
