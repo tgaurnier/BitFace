@@ -8,10 +8,10 @@ enum dateFormatter
 {
   dmyyyy,
   ddmmyyyy,
-  dm,
-  dmyyyy,
-  md,
-  mdyyyy,
+  dmmm,
+  dmmmyyyy,
+  mmmd,
+  mmmdyyyy,
   mdyyyy,
   mmddyyyy,
 };
@@ -49,6 +49,9 @@ void get_date_formatter(char *buffer)
       
       break;
       
+    default:
+      
+      break;
   }
 }
 

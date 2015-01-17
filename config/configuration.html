@@ -36,10 +36,10 @@
         <select name="date-format" id="date-format">
           <option value="dmyyyy">31/1/2015</option>
           <option value="ddmmyyyy">31/01/2015</option>
-          <option value="dm">31 Jan</option>
-          <option value="dmyyyy">31 Jan 2015</option>
-          <option value="md">Jan 31</option>
-          <option value="mdyyyy">Jan 31 2015</option>
+          <option value="dmmm">31 Jan</option>
+          <option value="dmmmyyyy">31 Jan 2015</option>
+          <option value="mmmd">Jan 31</option>
+          <option value="mmmdyyyy">Jan 31 2015</option>
           <option value="mdyyyy">1/31/2015</option>
           <option value="mmddyyyy">01/31/2015</option>
         </select>
@@ -62,21 +62,34 @@
   <script>
     function saveOptions() {
       var options = {
-	'searchingFor': $("#searchingFor").val()
+	'invert-colours': $("#invert-colours").val()
+	'date-format': $("date-format").val()
       }
       return options;
     }
+    
+    function populateConfig() {
+      var invertColours = getURLVariable('invert-colours');
+      invertColours = decodeURI(invertColours);
+      if (invertColours) {
+	$('invert-colours').html(invertColours);
+      }
+      
+      var dateFormat = getURLVariable('date-format');
+      dateFormat = decodeURI(dateFormat);
+      if (dateFormat) {
+	$('date-format').html(dateFormat);
+      }
+    }
 
     $(document).ready(function() {
-      var priorSearch = getURLVariable('searchingFor');
-      priorSearch = decodeURI(priorSearch);
 
-      if (priorSearch) {
-	$('#searchingFor').html(priorSearch);
-      }
+      populateConfig();
+      
       $("#b-cancel").click(function() {
 	document.location = "pebblejs://close";
       });
+      
       $("#b-submit").click(function() {
 	var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(saveOptions()));
 	document.location = location;
