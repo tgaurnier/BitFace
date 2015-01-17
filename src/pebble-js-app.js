@@ -22,12 +22,12 @@ function(e) {
     var configuration = JSON.parse(decodeURIComponent(e.response));
       // Construct a dictionary
   var dict = {
-    'KEY_INVERT' : configuration.invert-colours,
-    'KEY_DATE_FORMAT' : configuration.date-format,
-    'KEY_BATTERY_HIDE' : configuration.battery-hide
+    'KEY_INVERT' : configuration.invert_colours,
+    'KEY_DATE_FORMAT' : configuration.date_format,
+    'KEY_BATTERY_HIDE' : configuration.battery_hide
   };
 
-  console.log(dict);
+  console.log('created config dict: ' +dict);
   
   // Send a string to Pebble
   Pebble.sendAppMessage(dict,

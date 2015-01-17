@@ -194,7 +194,8 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 
 		static char date_text[] = "Xxxxxxxxx\n00/00/00";
 
-		strftime(date_text, sizeof(date_text), "%A\n%m/%d/%y", tick_time);
+		// TODO: Revert it back to "%A\n%m/%d/%y"
+		strftime(date_text, sizeof(date_text), "%A\n%d/%m/%y", tick_time);
 		text_layer_set_text(date_layer, date_text);
 	}
 
