@@ -18,8 +18,8 @@ Pebble.addEventListener('showConfiguration', function(e) {
 // register webviewclosed event listner
 Pebble.addEventListener('webviewclosed',
 function(e) {
-    console.log('Configuration window returned: ' + e.response);
     var configuration = JSON.parse(decodeURIComponent(e.response));
+    console.log('Configuration window returned: ' + configuration);
       // Construct a dictionary
   var dict = {
     'KEY_INVERT' : configuration.invert_colours,
@@ -27,7 +27,7 @@ function(e) {
     'KEY_BATTERY_HIDE' : configuration.battery_hide
   };
 
-  console.log('created config dict: ' +dict);
+  console.log('created config dict: ' + dict);
   
   // Send a string to Pebble
   Pebble.sendAppMessage(dict,

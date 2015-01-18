@@ -1,6 +1,13 @@
 
 # Ignore build generated files
 build
+.lock-waf*
 
 # Ignore Geany project file
 *.geany
+
+# ignore text edittor temp file
+*.*~
+
+# ignore vim swp file
+*.*swp
