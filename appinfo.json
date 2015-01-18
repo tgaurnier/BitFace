@@ -51,13 +51,13 @@
     
     "preferences": {
 	"embedded": false,
-	"debug": true,
+	"debug": false,
 	"url": "https://dl.dropboxusercontent.com/u/38622080/pebbleconfigs/BitFace/autoconfig.html",
-	"description": "Use the form to configure your <strong>Pebble Watch</strong>",
+	"description": "Configure your <strong>BitFace WatchFace</strong>",
 	"items": [
 		{
 		    "name": "colours_inverted",
-		    "title": "Invert Colours",
+		    "title": "Invert Colours - TO BE IMPLEMENTED",
 		    "description": "Inverted : Background = white and Foreground (Text and drawings) = black",
 		    "type": "boolean",
 		    "off-text": "No",
@@ -70,16 +70,16 @@
 		    "description": "Date format to use for the date at the bottom",
 		    "type": "enum",
 		    "choices": {
-		      "dmyyyy" : "31/1/2015",
-		      "ddmmyyyy" : "31/01/2015",
+		      "dmyyyy" : "31/01/2015 (1/2 digit day)",
+		      "ddmmyyyy" : "31/01/2015 (2 digit day)",
 		      "dmmm" : "31 Jan",
 		      "dmmmyyyy" : "31 Jan 2015",
 		      "mmmd" : "Jan 31",
 		      "mmmdyyyy" : "Jan 31 2015",
-		      "mdyyyy" : "1/31/2015",
-		      "mmddyyyy" : "01/31/2015"
+		      "mdyyyy" : "01/31/2015 (1/2 digit day)",
+		      "mmddyyyy" : "01/31/2015 (2 digit day)"
 		    },
-		    "default": 2
+		    "default": 1
 		},
 		{
 		    "name": "battery_hide_interval",

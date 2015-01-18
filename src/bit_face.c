@@ -194,12 +194,13 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 
 		static char date_text[] = "Xxxxxxxxx\n00/00/00";
 
-		// TODO: Revert it back to "%A\n%m/%d/%y"
-		strftime(date_text, sizeof(date_text), "%A\n%d/%m/%y", tick_time);
+		char date_fromatter[10];
+		get_date_formatter(date_fromatter);
+		strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
 		text_layer_set_text(date_layer, date_text);
 	}
 
-	else if(count == 5) {
+	else if(count == (int)getBattery_hide_interval()) {
 		BatteryChargeState state = battery_state_service_peek();
 		if(!(state.is_plugged || state.charge_percent <= 20))
 			hide_battery();
@@ -212,14 +213,21 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void config_changed(config current_config) {
+	
+	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
+	// Do a partial reset.
+	// TODO: rewrite this in optmization phase
+	tick_timer_service_unsubscribe();
+	
+	show_battery();
 
-  
+	tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
 }
 
 static void init(void) {
   
-  // Initialise config reading
-  config_init(config_changed);
+	// Initialise config reading
+	config_init(config_changed);
   
 	window = window_create();
 	window_stack_push(window, true);
