@@ -182,7 +182,7 @@ static void set_battery(BatteryChargeState state) {
 	// Show or hide battery indicator
 	if(state.is_plugged || state.charge_percent <= 20)
 		show_battery();
-	else
+	else if((int)getBattery_hide_interval()!=100)
 		hide_battery();
 }
 
@@ -200,7 +200,7 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 		text_layer_set_text(date_layer, date_text);
 	}
 
-	else if(count == (int)getBattery_hide_interval()) {
+	else if(count == (int)getBattery_hide_interval() && (int)getBattery_hide_interval()!=100) {
 		BatteryChargeState state = battery_state_service_peek();
 		if(!(state.is_plugged || state.charge_percent <= 20))
 			hide_battery();
@@ -219,7 +219,10 @@ static void config_changed(config current_config) {
 	// TODO: rewrite this in optmization phase
 	tick_timer_service_unsubscribe();
 	
-	show_battery();
+	if((int)getBattery_hide_interval()>0)
+	  show_battery();
+	else			// workaround for autoconfig sending default values once and real values afterwords
+	  hide_battery();
 
 	tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
 }

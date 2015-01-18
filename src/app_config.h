@@ -1,8 +1,29 @@
+/**
+ * Bit Face
+ * A binary watch face
+ * Used "Just A Bit" as a Guide
+ * Used Pebble-Autoconfig for configuration
+ *
+ * Copyright 2014 Renjith I S
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include <pebble.h>
 // Include Pebble Autoconfig
 #include "autoconfig.h"
   
-
 typedef enum {
 	dmyyyy,
 	ddmmyyyy,
@@ -12,7 +33,7 @@ typedef enum {
 	mmmdyyyy,
 	mdyyyy,
 	mmddyyyy,
-} DateFormatter;
+} DateFormatter;		// TODO: change this to all_small_letters
 
 typedef struct  {
 	bool colours_inverted;
@@ -30,9 +51,9 @@ void config_deinit();
 config_changed_callback config_changed_function;		// Any advantage/disadvantage by using a static pointer?
 
 void get_date_formatter(char* buffer) {
-  config current_config=get_current_config();
-  switch (current_config.date_fromat)
-  {
+    config current_config=get_current_config();
+    switch (current_config.date_fromat)
+    {
 	  /* Ref  : http://linux.die.net/man/3/strftime
 	   * Ref2 : http://www.cplusplus.com/reference/ctime/strftime/ */
 	  case dmyyyy:
@@ -71,7 +92,7 @@ void get_date_formatter(char* buffer) {
 		break;
 		*/
 	  default:
-	  		strcpy(buffer, "%A\n%e/%m/%Y");
+	  	strcpy(buffer, "%A\n%e/%m/%Y");
 		break;
   }
 }
@@ -120,6 +141,3 @@ void config_deinit() {
 	// Let Pebble Autoconfig write settings to Pebbles persistant memory
 	autoconfig_deinit();
 }
-
-
-
