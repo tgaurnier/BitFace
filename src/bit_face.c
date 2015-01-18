@@ -211,27 +211,9 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 	count++;
 }
 
-static void config_changed(DictionaryIterator *iterator) {
-  // Get the first pair
-  Tuple *t = dict_read_first(iterator);
+static void config_changed(config current_config) {
 
-  // Process all pairs present
-  while (t != NULL) {
-    // Long lived buffer
-    static char s_buffer[64];
-
-    // Process this pair's key
-    switch (t->key) {
-      case KEY_DATA:
-        // Copy value and display
-        snprintf(s_buffer, sizeof(s_buffer), "Received '%s'", t->value->cstring);
-        text_layer_set_text(date_layer, s_buffer); // using date_layer for testing
-        break;
-    }
-
-    // Get next pair, if any
-    t = dict_read_next(iterator);
-  }
+  
 }
 
 static void init(void) {

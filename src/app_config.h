@@ -1,11 +1,9 @@
 #include <pebble.h>
-
-#define KEY_DATA 5
+// Include Pebble Autoconfig
+#include "autoconfig.h"
   
-void *config_changed_callback(DictionaryIterator *config_iterator);
 
-typedef enum
-{
+typedef enum {
   dmyyyy,
   ddmmyyyy,
   dmmm,
@@ -16,95 +14,54 @@ typedef enum
   mmddyyyy,
 } DateFormatter;
 
-struct config
+typedef struct  {
+  bool colours_inverted;
+  DateFormatter date_fromat;
+  int battery_hide_seconds;
+} config;
+
+typedef void (*config_changed_callback)(config);
+
+config get_current_config()
 {
-  bool coloursInverted;
-  DateFormatter dateFomat;
+  config current_config;
   
-};
-
-static struct config app_config;
-
-GColor get_foreground_colour()
-{
-  if(app_config.coloursInverted)
-    return GColorBlack;
-  else
-    return GColorWhite;
+  return current_config;
 }
 
-GColor get_background_colour()
-{
-  if(app_config.coloursInverted)
-    return GColorWhite;
-  else
-    return GColorBlack;
+static void in_received_handler(DictionaryIterator *iter, void *context) {
+        // Let Pebble Autoconfig handle received settings
+        autoconfig_in_received_handler(iter, context);
+
+        // Here the updated settings are available
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Configuration updated. Background: %s Direction: %d Length: %d",
+                getColours_inverted() ? "true" : "false", getDate_format(), (int)getBattery_hide_interval()); 
 }
 
-void get_date_formatter(char *buffer)
-{
-  switch(app_config.dateFomat)
-  {
-    case dmyyyy :
-      
-      break;
-      
-    default:
-      
-      break;
-  }
-}
-
-
-
-static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   
-  APP_LOG(APP_LOG_LEVEL_INFO, "Message received");
-//   // Get the first pair
-//   Tuple *t = dict_read_first(iterator);
-
-//   // Process all pairs present
-//   while (t != NULL) {
-//     // Long lived buffer
-//     static char s_buffer[64];
-
-//     // Process this pair's key
-//     switch (t->key) {
-//       case KEY_DATA:
-//         // Copy value and display
-//         snprintf(s_buffer, sizeof(s_buffer), "Received '%s'", t->value->cstring);
-//         text_layer_set_text(s_output_layer, s_buffer);
-//         break;
-//     }
-
-//     // Get next pair, if any
-//     t = dict_read_next(iterator);
-//   }
+void config_init(config_changed_callback config_changed) {
   
-//   config_changed_callback(iterator);
+        // Initialize Pebble Autoconfig to register App Message handlers and restores settings
+        autoconfig_init();
+
+        // Here the restored or defaulted settings are available
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Configuration updated. Background: %s Direction: %d Length: %d",
+                getColours_inverted() ? "true" : "false", getDate_format(), (int)getBattery_hide_interval()); 
+
+	// Call back wit current config
+	config_changed(get_current_config());
+	
+        // Register our custom receive handler which in turn will call Pebble Autoconfigs receive handler
+        app_message_register_inbox_received(in_received_handler);
+
+    
+
 }
 
-static void inbox_dropped_callback(AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
-}
-
-static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
-}
-
-static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
-}
+void config_deinit() {
   
-void config_init(void *config_changed) {
-  
-  // Register callbacks
-app_message_register_inbox_received(inbox_received_callback);
-app_message_register_inbox_dropped(inbox_dropped_callback);
-app_message_register_outbox_failed(outbox_failed_callback);
-app_message_register_outbox_sent(outbox_sent_callback);
-
-
+  // Let Pebble Autoconfig write settings to Pebbles persistant memory
+  autoconfig_deinit();
 }
 
 
