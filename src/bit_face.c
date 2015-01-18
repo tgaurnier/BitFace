@@ -175,7 +175,7 @@ static void set_battery(BatteryChargeState state) {
 
 	// Show or hide charging icon
 	if(state.is_plugged)
-		layer_set_hidden (bitmap_layer_get_layer(charge_layer), false);
+		layer_set_hidden(bitmap_layer_get_layer(charge_layer), false);
 	else
 		layer_set_hidden(bitmap_layer_get_layer(charge_layer), true);
 
@@ -213,7 +213,6 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void config_changed(config current_config) {
-	
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
 	// Do a partial reset.
 	// TODO: rewrite this in optmization phase
@@ -228,7 +227,6 @@ static void config_changed(config current_config) {
 }
 
 static void init(void) {
-  
 	// Initialise config reading
 	config_init(config_changed);
   
