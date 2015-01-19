@@ -161,6 +161,8 @@ static void show_battery() {
 
 static void set_battery(BatteryChargeState state) {
 	// Set battery percent layer, account for bug where state.charge_percent never gets above 90
+	// Just a test to see if this has been fixed
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Battery state.charge_percent=%d", state.charge_percent);
 	if(state.is_plugged && !state.is_charging && state.charge_percent == 90)
 		snprintf(percent_str, sizeof(percent_str), "100%%");
 	else
@@ -187,30 +189,34 @@ static void set_battery(BatteryChargeState state) {
 }
 
 
+
 static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 	static uint8_t count = 1;
-	if(count == 1) {
-		layer_mark_dirty(display_layer);
 
-		static char date_text[] = "Xxxxxxxxx\n00/00/00";
+	int battery_hide_seconds = (int)getBattery_hide_interval();
 
-		char date_fromatter[10];
-		get_date_formatter(date_fromatter);
-		strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
-		text_layer_set_text(date_layer, date_text);
-	}
-
-	else if(count == (int)getBattery_hide_interval() && (int)getBattery_hide_interval()!=100) {
+	if(count >= battery_hide_seconds && battery_hide_seconds != 100) {
 		BatteryChargeState state = battery_state_service_peek();
 		if(!(state.is_plugged || state.charge_percent <= 20))
 			hide_battery();
 	}
-
-	else if(count == 60)
-		count = 0;
-
+	
 	count++;
 }
+
+
+static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
+	layer_mark_dirty(display_layer);
+
+	static char date_text[] = "Xxxxxxxxx\n00/00/00";
+
+	char date_fromatter[10];
+	get_date_formatter(date_fromatter);
+	strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
+	text_layer_set_text(date_layer, date_text);
+	
+}
+
 
 static void config_changed(config current_config) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
@@ -218,12 +224,17 @@ static void config_changed(config current_config) {
 	// TODO: rewrite this in optmization phase
 	tick_timer_service_unsubscribe();
 	
-	if((int)getBattery_hide_interval()>0)
+	int battery_hide_seconds = (int)getBattery_hide_interval();
+
+	if(battery_hide_seconds>0)
 	  show_battery();
 	else			// workaround for autoconfig sending default values once and real values afterwords
 	  hide_battery();
 
-	tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
+	if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
+		tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);	// second tick only needed to hide battery indicator
+		
+	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
 }
 
 static void init(void) {
@@ -283,15 +294,27 @@ static void init(void) {
 	text_layer_set_text_alignment(percent_layer, GTextAlignmentCenter);
 	text_layer_set_font(percent_layer, font_tiny);
 	layer_add_child(root_layer, text_layer_get_layer(percent_layer));
-
+	
+	// Monitor charging and unplug
 	battery_state_service_subscribe(set_battery);
-	set_battery(battery_state_service_peek());
-	show_battery();
-
-	tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
+	
+	int battery_hide_seconds = (int)getBattery_hide_interval();
+	if(battery_hide_seconds >0) {
+		// Show current battery level on watchface launch
+		set_battery(battery_state_service_peek());			
+		show_battery();
+		
+		if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
+			tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);	// second tick only needed to hide battery indicator
+	}
+		
+	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
 }
 
+
 static void deinit(void) {
+	config_deinit();
+	
 	layer_destroy(display_layer);
 	text_layer_destroy(date_layer);
 	text_layer_destroy(percent_layer);
