@@ -54,8 +54,11 @@ GFont font_tiny;
 #define HOURS_FIRST_DIGIT_MAX_ROWS		1 + clock_is_24h_style() // 2 rows if 24 hour time
 #define MINUTES_FIRST_DIGIT_MAX_ROWS	3
 
-static char percent_str[] = "xxx%";
+// Forward declarations
+// TODO : forward declare all functions
+static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed);
 
+static char percent_str[] = "xxx%";
 
 static void draw_cell(GContext* context, GPoint center, bool filled) {
 	// Each cell is a bit
@@ -191,6 +194,7 @@ static void set_battery(BatteryChargeState state) {
 
 
 static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
+	APP_LOG(APP_LOG_LEVEL_DEBUG,"handle_second_tick");
 	static uint8_t count = 1;
 
 	int battery_hide_seconds = (int)getBattery_hide_interval();
@@ -199,6 +203,10 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 		BatteryChargeState state = battery_state_service_peek();
 		if(!(state.is_plugged || state.charge_percent <= 20))
 			hide_battery();
+		else
+			APP_LOG(APP_LOG_LEVEL_DEBUG,"Not hiding battery. either being changed or battery low");
+		tick_timer_service_unsubscribe();
+		tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
 	}
 	
 	count++;
@@ -214,17 +222,17 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 	get_date_formatter(date_fromatter);
 	strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
 	text_layer_set_text(date_layer, date_text);
-	
 }
 
 
 static void config_changed(config current_config) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
+	APP_LOG(APP_LOG_LEVEL_DEBUG,"Current config :\n\tcolours_inverted=%d\n\tdate_fromat=%d\n\tbattery_hide_seconds=%d",	current_config.colours_inverted, current_config.date_fromat, current_config.battery_hide_seconds);
 	// Do a partial reset.
 	// TODO: rewrite this in optmization phase
 	tick_timer_service_unsubscribe();
 	
-	int battery_hide_seconds = (int)getBattery_hide_interval();
+	int battery_hide_seconds = current_config.battery_hide_seconds;
 
 	if(battery_hide_seconds>0)
 	  show_battery();
