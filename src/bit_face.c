@@ -151,7 +151,17 @@ static void display_layer_update_callback(Layer *me, GContext* context) {
 
 static void hide_battery() {
 	//Move date layer back to original position
-	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
+	// Set start and end
+	GRect from_frame = layer_get_frame((Layer *)date_layer);
+	GRect to_frame = GRect(0, 130, 144, 168-130);
+
+	// Create the animation
+	PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
+
+	// Schedule to occur ASAP with default settings
+	animation_schedule((Animation*) s_property_animation);
+	
+//	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
 
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), true);
 	layer_set_hidden(text_layer_get_layer(percent_layer), true);
@@ -161,7 +171,16 @@ static void hide_battery() {
 
 static void show_battery() {
 	// Move date layer a bit to the right so as not to hide the day
-	layer_set_frame(text_layer_get_layer(date_layer), GRect(10, 130, 144, 168-130));
+	// Set start and end
+	GRect from_frame = layer_get_frame((Layer *)date_layer);
+	GRect to_frame = GRect(10, 130, 144, 168-130);
+
+	// Create the animation
+	PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
+
+	// Schedule to occur ASAP with default settings
+	animation_schedule((Animation*) s_property_animation);
+	//layer_set_frame(text_layer_get_layer(date_layer), GRect(10, 130, 144, 168-130));
 
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), false);
 	layer_set_hidden(text_layer_get_layer(percent_layer), false);
@@ -177,7 +196,7 @@ static void set_battery(BatteryChargeState state) {
 //	if(state.is_plugged && !state.is_charging && state.charge_percent == 90)
 //		snprintf(percent_str, sizeof(percent_str), "100%%");
 //	else
-		snprintf(percent_str, sizeof(percent_str), "%d%%", (int)state.charge_percent);
+	snprintf(percent_str, sizeof(percent_str), "%d%%", (int)state.charge_percent);
 	text_layer_set_text(percent_layer, percent_str);
 
 	// Set battery fill layer
@@ -206,26 +225,8 @@ void handle_battery_hide_timer(void *data) {
 			hide_battery();
 		else
 			APP_LOG(APP_LOG_LEVEL_DEBUG,"Not hiding battery. either being changed or battery low");
-}
-
-
-static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
-	APP_LOG(APP_LOG_LEVEL_DEBUG,"handle_second_tick");
-	static uint8_t count = 1;
-
-	int battery_hide_seconds = (int)getBattery_hide_interval();
-
-	if(count >= battery_hide_seconds && battery_hide_seconds != 100) {
-		BatteryChargeState state = battery_state_service_peek();
-		if(!(state.is_plugged || state.charge_percent <= 20))
-			hide_battery();
-		else
-			APP_LOG(APP_LOG_LEVEL_DEBUG,"Not hiding battery. either being changed or battery low");
-		tick_timer_service_unsubscribe();
-		tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
-	}
-	
-	count++;
+	// cancel the timer if not already done
+	//app_timer_cancel(battery_timer);	// causing error message in log : Timer ##### does not exist
 }
 
 
@@ -331,10 +332,7 @@ static void init(void) {
 		show_battery();
 		
 		if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
-		{
-			//tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);	// second tick only needed to hide battery indicator
 			battery_timer=app_timer_register(battery_hide_seconds*1000, handle_battery_hide_timer, NULL);
-		}
 	}
 		
 	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
