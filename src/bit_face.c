@@ -150,6 +150,9 @@ static void display_layer_update_callback(Layer *me, GContext* context) {
 
 
 static void hide_battery() {
+	//Move date layer back to original position
+	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
+
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), true);
 	layer_set_hidden(text_layer_get_layer(percent_layer), true);
 	layer_set_hidden(inverter_layer_get_layer(battfill_layer), true);
@@ -157,6 +160,9 @@ static void hide_battery() {
 
 
 static void show_battery() {
+	// Move date layer a bit to the right so as not to hide the day
+	layer_set_frame(text_layer_get_layer(date_layer), GRect(10, 130, 144, 168-130));
+
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), false);
 	layer_set_hidden(text_layer_get_layer(percent_layer), false);
 	layer_set_hidden(inverter_layer_get_layer(battfill_layer), false);
