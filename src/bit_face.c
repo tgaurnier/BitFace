@@ -226,9 +226,9 @@ static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 	layer_mark_dirty(display_layer);
 
-	static char date_text[] = "Xxxxxxxxx\n00/00/00";
+	static char date_text[] = "Xxxxxxxxx\n00/000/0000";
 
-	char date_fromatter[10];
+	char date_fromatter[15];
 	get_date_formatter(date_fromatter);
 	strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
 	text_layer_set_text(date_layer, date_text);
