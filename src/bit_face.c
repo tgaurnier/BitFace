@@ -29,6 +29,7 @@ TextLayer *percent_layer;
 BitmapLayer *battery_layer;
 BitmapLayer *charge_layer;
 InverterLayer *battfill_layer;
+InverterLayer *inverter_layer;
 GBitmap *battery_outline;
 GBitmap *battery_charge;
 GFont font;
@@ -180,6 +181,7 @@ static void show_battery() {
 
 	// Schedule to occur ASAP with default settings
 	animation_schedule((Animation*) s_property_animation);
+	
 	//layer_set_frame(text_layer_get_layer(date_layer), GRect(10, 130, 144, 168-130));
 
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), false);
@@ -245,9 +247,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void config_changed(config current_config) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Current config :\n\tcolours_inverted=%d\n\tdate_fromat=%d\n\tbattery_hide_seconds=%d",	current_config.colours_inverted, current_config.date_fromat, current_config.battery_hide_seconds);
-	// Do a partial reset.
-	// TODO: rewrite this in optmization phase
-	tick_timer_service_unsubscribe();
+
 	app_timer_cancel(battery_timer);
 
 	int battery_hide_seconds = current_config.battery_hide_seconds;
@@ -259,9 +259,9 @@ static void config_changed(config current_config) {
 
 	if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
 		battery_timer=app_timer_register(battery_hide_seconds*1000, handle_battery_hide_timer, NULL);
-		//tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);	// second tick only needed to hide battery indicator
-		
-	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
+		//tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);	// second tick only needed to hide battery indicator		
+	
+	layer_set_hidden((Layer *)inverter_layer, !current_config.colours_inverted);
 }
 
 static void init(void) {
@@ -322,6 +322,11 @@ static void init(void) {
 	text_layer_set_font(percent_layer, font_tiny);
 	layer_add_child(root_layer, text_layer_get_layer(percent_layer));
 	
+	// Init layer to invert colours
+	inverter_layer = inverter_layer_create(frame);
+	layer_set_hidden((Layer *)inverter_layer, !getColours_inverted());
+	layer_add_child(root_layer, (Layer *)inverter_layer);
+
 	// Monitor charging and unplug
 	battery_state_service_subscribe(set_battery);
 	
@@ -348,6 +353,7 @@ static void deinit(void) {
 	bitmap_layer_destroy(battery_layer);
 	bitmap_layer_destroy(charge_layer);
 	inverter_layer_destroy(battfill_layer);
+	inverter_layer_destroy(inverter_layer);
 	fonts_unload_custom_font(font);
 	fonts_unload_custom_font(font_tiny);
 	gbitmap_destroy(battery_outline);
