@@ -190,14 +190,8 @@ static void show_battery() {
 }
 
 
-static void set_battery(BatteryChargeState state) {
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Battery state.charge_percent=%d", state.charge_percent);
-	
-	// Set battery percent layer, account for bug where state.charge_percent never gets above 90.
-	// This bug seems to have been fixed by Pebble devs. now getting state.charge_percent=100
-//	if(state.is_plugged && !state.is_charging && state.charge_percent == 90)
-//		snprintf(percent_str, sizeof(percent_str), "100%%");
-//	else
+static void set_battery(BatteryChargeState state) {	
+	// Set battery percent layer
 	snprintf(percent_str, sizeof(percent_str), "%d%%", (int)state.charge_percent);
 	text_layer_set_text(percent_layer, percent_str);
 
@@ -259,7 +253,6 @@ static void config_changed(config current_config) {
 
 	if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
 		battery_timer=app_timer_register(battery_hide_seconds*1000, handle_battery_hide_timer, NULL);
-		//tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);	// second tick only needed to hide battery indicator		
 	
 	layer_set_hidden((Layer *)inverter_layer, !current_config.colours_inverted);
 }
