@@ -52,7 +52,7 @@
     "preferences": {
 	"embedded": false,
 	"debug": false,
-	"url": "https://raw.githubusercontent.com/renjithis/BitFace/master/config/autoconfig.html",
+	"url": "https://rawgithub.com/renjithis/BitFace/master/config/autoconfig.html",
 	"description": "Configure your <strong>BitFace WatchFace</strong>",
 	"items": [
 		{
