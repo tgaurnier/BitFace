@@ -261,7 +261,7 @@ div.clear {
 			<form class="pure-form pure-form-stacked">
 				<fieldset>
 					<div class="pure-control-group">
-						<h4>Invert Colours - TO BE IMPLEMENTED</h4>
+						<h4>Invert Colours</h4>
 						<div class="description">Inverted : Background = white and Foreground (Text and drawings) = black</div>
 						<label for="colours_inverted-off" class="pure-radio">
 							<input id="colours_inverted-off" type="radio" name="colours_inverted" value="0" data-exclude checked>
@@ -307,6 +307,37 @@ div.clear {
 								</div>
 							</div>
 						</div>
+					</div>
+					<div class="pure-control-group">
+						<h4>Vibrate every hour</h4>
+						<div class="description">Give -1 to not to vibrate</div>
+						<div class="pure-g">
+							<div class="pure-u-1-4">
+								<div class="l-box">
+									<input id="hourly_vibrate_interval" class="pure-input-1" type="number" name="hourly_vibrate_interval" min="-1" max="10" value="1" required>
+								</div>
+							</div>
+							<div class="pure-u-3-4">
+								<div class="l-box">
+									<input class="pure-input-1" type="range" min="-1" max="10" data-exclude>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="pure-control-group">
+						<h4>Vibrate on bluetooth disconnect</h4>
+						<div class="description">Vibrates when Pebble gets disconnected from ohone</div>
+						<label for="bluetooth_vibrate-off" class="pure-radio">
+							<input id="bluetooth_vibrate-off" type="radio" name="bluetooth_vibrate" value="0" data-exclude checked>
+							No
+						</label>
+						<label for="bluetooth_vibrate" class="pure-radio">
+							<input id="bluetooth_vibrate" type="radio" name="bluetooth_vibrate" value="1">
+							Yes
+						</label>
+						<script type="text/javascript">
+						document.querySelector("#bluetooth_vibrate").checked = false;
+						</script>
 					</div>
 				</fieldset>
 				<div class="buttons">
