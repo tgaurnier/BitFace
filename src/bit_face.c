@@ -157,12 +157,13 @@ static void hide_battery() {
 	GRect to_frame = GRect(0, 130, 144, 168-130);
 
 	// Create the animation
-	PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
+	//PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
 
 	// Schedule to occur ASAP with default settings
-	animation_schedule((Animation*) s_property_animation);
+	//animation_schedule((Animation*) s_property_animation);
 	
-//	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
+	layer_set_frame(text_layer_get_layer(date_layer), to_frame);
+	//layer_set_bounds(text_layer_get_layer(date_layer), GRect(0, 0, 144, 168-130));
 
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), true);
 	layer_set_hidden(text_layer_get_layer(percent_layer), true);
@@ -174,15 +175,15 @@ static void show_battery() {
 	// Move date layer a bit to the right so as not to hide the day
 	// Set start and end
 	GRect from_frame = layer_get_frame((Layer *)date_layer);
-	GRect to_frame = GRect(10, 130, 144, 168-130);
+	GRect to_frame = GRect(0, 130, 144+20, 168-130); // increase width so that text is moved accordingly (since aligned to center) : ISSUE text not going back
 
 	// Create the animation
-	PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
+	//PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
 
 	// Schedule to occur ASAP with default settings
-	animation_schedule((Animation*) s_property_animation);
+	//animation_schedule((Animation*) s_property_animation);
 	
-	//layer_set_frame(text_layer_get_layer(date_layer), GRect(10, 130, 144, 168-130));
+	layer_set_frame(text_layer_get_layer(date_layer), to_frame);
 
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), false);
 	layer_set_hidden(text_layer_get_layer(percent_layer), false);
@@ -334,6 +335,17 @@ static void init(void) {
 	}
 		
 	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
+	
+	/* Next : 
+	 * Add hourly vibrate setting
+	 * Add Bluetooth disconnect vibrate setting. Add icon for it 😠
+	 * Battery show/hide slide animation
+	 * Check battery layer already hidden and do nothing if yes/no accordingly
+	 */
+	
+	/* Optimize :
+	 * Redundant frame setting of layers
+	 */
 }
 
 
