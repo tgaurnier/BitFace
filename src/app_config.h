@@ -33,12 +33,13 @@ typedef enum {
 	mmmdyyyy,
 	mdyyyy,
 	mmddyyyy,
-} DateFormatter;		// TODO: change this to all_small_letters
+} date_formatter;		// TODO: change this to all_small_letters
 
 typedef struct  {
 	bool colours_inverted;
-	DateFormatter date_fromat;
+	date_formatter date_fromat;
 	int battery_hide_seconds;
+	int hourly_vibrate_interval;
 } config;
 
 typedef void (*config_changed_callback)(config);
@@ -103,7 +104,8 @@ config get_current_config() {
 	current_config.colours_inverted=getColours_inverted();
 	current_config.date_fromat=getDate_format();
 	current_config.battery_hide_seconds=getBattery_hide_interval();
-
+	current_config.hourly_vibrate_interval=getHourly_vibrate_interval();
+	
 	return current_config;
 }
 

@@ -236,6 +236,16 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 	get_date_formatter(date_fromatter);
 	strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
 	text_layer_set_text(date_layer, date_text);
+	
+	static int last_vibrated_hour;
+	
+	if((int)getHourly_vibrate_interval()>0 && \
+	tick_time->tm_min == 0 && \
+	tick_time->tm_hour % (int)getHourly_vibrate_interval() == 0 && \
+	tick_time->tm_hour != last_vibrated_hour) {
+		last_vibrated_hour=tick_time->tm_hour;
+		vibes_short_pulse();
+	}
 }
 
 

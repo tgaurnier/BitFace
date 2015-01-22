@@ -2,7 +2,8 @@
     "appKeys": {
         "colours_inverted": 0,
         "date_format": 1,
-        "battery_hide_interval": 2
+        "battery_hide_interval": 2,
+        "hourly_vibrate_interval": 3
     },
     "capabilities": [
         "configurable"
@@ -57,7 +58,7 @@
 	"items": [
 		{
 		    "name": "colours_inverted",
-		    "title": "Invert Colours - TO BE IMPLEMENTED",
+		    "title": "Invert Colours",
 		    "description": "Inverted : Background = white and Foreground (Text and drawings) = black",
 		    "type": "boolean",
 		    "off-text": "No",
@@ -89,7 +90,16 @@
 		    "min": -1,
 		    "max": 100,
 		    "default": 10
-	      }
+	    },
+	    {
+		    "name": "hourly_vibrate_interval",
+		    "title": "Vibrate every hour",
+		    "description": "Give -1 to not to vibrate",
+		    "type": "integer",
+		    "min": -1,
+		    "max": 10,
+		    "default": 1
+	    }
 	]
     }
 }
