@@ -37,6 +37,7 @@ typedef enum {
 
 typedef struct  {
 	bool colours_inverted;
+	bool bluetooth_vibrate;
 	date_formatter date_fromat;
 	int battery_hide_seconds;
 	int hourly_vibrate_interval;
@@ -105,6 +106,7 @@ config get_current_config() {
 	current_config.date_fromat=getDate_format();
 	current_config.battery_hide_seconds=getBattery_hide_interval();
 	current_config.hourly_vibrate_interval=getHourly_vibrate_interval();
+	current_config.bluetooth_vibrate=getBluetooth_vibrate();
 	
 	return current_config;
 }

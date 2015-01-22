@@ -3,7 +3,8 @@
         "colours_inverted": 0,
         "date_format": 1,
         "battery_hide_interval": 2,
-        "hourly_vibrate_interval": 3
+        "hourly_vibrate_interval": 3,
+        "bluetooth_vibrate": 4
     },
     "capabilities": [
         "configurable"
@@ -99,7 +100,16 @@
 		    "min": -1,
 		    "max": 10,
 		    "default": 1
-	    }
+	    },
+	    {
+		    "name": "bluetooth_vibrate",
+		    "title": "Vibrate on bluetooth disconnect",
+		    "description": "Vibrates when Pebble gets disconnected from ohone",
+		    "type": "boolean",
+		    "off-text": "No",
+		    "on-text": "Yes",
+		    "default": false
+		}
 	]
     }
 }

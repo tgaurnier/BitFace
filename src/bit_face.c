@@ -26,6 +26,7 @@ Window *window;
 Layer *display_layer;
 TextLayer *date_layer;
 TextLayer *percent_layer;
+Layer *bluetooth_disconnected_layer;
 BitmapLayer *battery_layer;
 BitmapLayer *charge_layer;
 InverterLayer *battfill_layer;
@@ -61,6 +62,39 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed);
 
 static char percent_str[] = "xxx%";
 AppTimer *battery_timer;
+
+static GPath *s_bt_path_ptr = NULL;
+static GPath *s_cross_path_prt = NULL;
+
+static const GPathInfo BT_PATH_INFO = {
+  .num_points = 6,
+  .points = (GPoint []) {{5, 0}, {12, 5}, {5, 9}, {12, 15}, {5, 20}, {5, 0}}
+};
+
+static const GPathInfo CROSS_PATH_INFO = {
+  .num_points = 4,
+  .points = (GPoint []) {{16, 0}, {0, 20}, {1, 20}, {17, 0}}
+};
+
+// .update_proc of my_layer:
+void my_layer_update_proc(Layer *my_layer, GContext* ctx) {
+	// Fill the path:
+	graphics_context_set_fill_color(ctx, GColorBlack);
+	graphics_context_set_stroke_color(ctx, GColorBlack);
+	
+	gpath_draw_filled(ctx, s_bt_path_ptr);
+	gpath_draw_outline(ctx, s_bt_path_ptr);
+	gpath_draw_filled(ctx, s_cross_path_prt);
+	gpath_draw_outline(ctx, s_cross_path_prt);
+  
+}
+
+void setup_bt_path(void) {
+  s_bt_path_ptr = gpath_create(&BT_PATH_INFO);
+  s_cross_path_prt = gpath_create(&CROSS_PATH_INFO);
+  // Translate by (5, 5):
+  gpath_move_to(s_bt_path_ptr, GPoint(2, 0));
+}
 
 static void draw_cell(GContext* context, GPoint center, bool filled) {
 	// Each cell is a bit
@@ -153,8 +187,8 @@ static void display_layer_update_callback(Layer *me, GContext* context) {
 static void hide_battery() {
 	//Move date layer back to original position
 	// Set start and end
-	GRect from_frame = layer_get_frame((Layer *)date_layer);
-	GRect to_frame = GRect(0, 130, 144, 168-130);
+	//GRect from_frame = layer_get_frame((Layer *)date_layer);
+	GRect to_frame = GRect(-10, 130, 154, 168-130);
 
 	// Create the animation
 	//PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
@@ -174,8 +208,8 @@ static void hide_battery() {
 static void show_battery() {
 	// Move date layer a bit to the right so as not to hide the day
 	// Set start and end
-	GRect from_frame = layer_get_frame((Layer *)date_layer);
-	GRect to_frame = GRect(0, 130, 144+20, 168-130); // increase width so that text is moved accordingly (since aligned to center) : ISSUE text not going back
+	//GRect from_frame = layer_get_frame((Layer *)date_layer);
+	GRect to_frame = GRect(0, 130, 164, 168-130); // increase width so that text is moved accordingly (since aligned to center) : ISSUE text not going back
 
 	// Create the animation
 	//PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
@@ -249,6 +283,33 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 
+void show_bluetooth_disconnected() {
+	bluetooth_disconnected_layer = layer_create(GRect(124, 134, 20, 20));
+	setup_bt_path();
+	
+	layer_set_update_proc(bluetooth_disconnected_layer, my_layer_update_proc);
+	layer_add_child(window_get_root_layer(window), bluetooth_disconnected_layer);
+}
+
+
+void hide_bluetooth_disconnected() {
+	layer_remove_from_parent(bluetooth_disconnected_layer);
+	layer_destroy(bluetooth_disconnected_layer);
+}
+
+
+void bt_handler(bool connected) {
+  if (connected) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
+    hide_bluetooth_disconnected();
+  } else {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
+    show_bluetooth_disconnected();
+    vibes_short_pulse();
+  }
+}
+
+
 static void config_changed(config current_config) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
 	APP_LOG(APP_LOG_LEVEL_DEBUG,"Current config :\n\tcolours_inverted=%d\n\tdate_fromat=%d\n\tbattery_hide_seconds=%d",	current_config.colours_inverted, current_config.date_fromat, current_config.battery_hide_seconds);
@@ -289,9 +350,9 @@ static void init(void) {
 	layer_set_update_proc(display_layer, &display_layer_update_callback);
 	layer_add_child(root_layer, display_layer);
 
-	// Init layer for text
+	// Init layer for text. Workaround frame for allowing movement to show battery
 	date_layer = text_layer_create(frame);
-	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
+	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 164, 168-130));
 	layer_set_bounds(text_layer_get_layer(date_layer), GRect(0, 0, 144, 168-130));
 	text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
 	text_layer_set_font(date_layer, font);
@@ -346,6 +407,10 @@ static void init(void) {
 		
 	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
 	
+	if(getBluetooth_vibrate()) {
+		bluetooth_connection_service_subscribe(bt_handler);
+	}
+		
 	/* Next : 
 	 * Add hourly vibrate setting
 	 * Add Bluetooth disconnect vibrate setting. Add icon for it 😠
@@ -361,6 +426,7 @@ static void init(void) {
 
 static void deinit(void) {
 	config_deinit();
+	bluetooth_connection_service_unsubscribe();
 	app_timer_cancel(battery_timer);
 	layer_destroy(display_layer);
 	text_layer_destroy(date_layer);
