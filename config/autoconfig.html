@@ -257,7 +257,7 @@ div.clear {
 			<h1>Bit Face</h1>
 		</header>
 		<article>
-			<div id="description">Configure your <strong>BitFace WatchFace</strong></div>
+			<div id="description">Configure your <strong>Bit Face WatchFace</strong></div>
 			<form class="pure-form pure-form-stacked">
 				<fieldset>
 					<div class="pure-control-group">
@@ -309,24 +309,8 @@ div.clear {
 						</div>
 					</div>
 					<div class="pure-control-group">
-						<h4>Vibrate every hour</h4>
-						<div class="description">Give -1 to not to vibrate</div>
-						<div class="pure-g">
-							<div class="pure-u-1-4">
-								<div class="l-box">
-									<input id="hourly_vibrate_interval" class="pure-input-1" type="number" name="hourly_vibrate_interval" min="-1" max="10" value="1" required>
-								</div>
-							</div>
-							<div class="pure-u-3-4">
-								<div class="l-box">
-									<input class="pure-input-1" type="range" min="-1" max="10" data-exclude>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="pure-control-group">
 						<h4>Vibrate on bluetooth disconnect</h4>
-						<div class="description">Vibrates when Pebble gets disconnected from ohone</div>
+						<div class="description">Vibrates when Pebble gets disconnected from phone</div>
 						<label for="bluetooth_vibrate-off" class="pure-radio">
 							<input id="bluetooth_vibrate-off" type="radio" name="bluetooth_vibrate" value="0" data-exclude checked>
 							No
@@ -338,6 +322,54 @@ div.clear {
 						<script type="text/javascript">
 						document.querySelector("#bluetooth_vibrate").checked = false;
 						</script>
+					</div>
+					<div class="pure-control-group">
+						<h4>Vibrate every hour</h4>
+						<div class="description">Give 0 to not to vibrate</div>
+						<div class="pure-g">
+							<div class="pure-u-1-4">
+								<div class="l-box">
+									<input id="hourly_vibrate_interval" class="pure-input-1" type="number" name="hourly_vibrate_interval" min="0" max="10" value="1" required>
+								</div>
+							</div>
+							<div class="pure-u-3-4">
+								<div class="l-box">
+									<input class="pure-input-1" type="range" min="0" max="10" data-exclude>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="pure-control-group">
+						<h4>Hourly vibration start time</h4>
+						<div class="description">When to start hourly vibration (hour)</div>
+						<div class="pure-g">
+							<div class="pure-u-1-4">
+								<div class="l-box">
+									<input id="hourly_vibrate_from_hours" class="pure-input-1" type="number" name="hourly_vibrate_from_hours" min="0" max="23" value="8" required>
+								</div>
+							</div>
+							<div class="pure-u-3-4">
+								<div class="l-box">
+									<input class="pure-input-1" type="range" min="0" max="23" data-exclude>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="pure-control-group">
+						<h4>Hourly vibration stop time</h4>
+						<div class="description">When to stop hourly vibration (hour)</div>
+						<div class="pure-g">
+							<div class="pure-u-1-4">
+								<div class="l-box">
+									<input id="hourly_vibrate_to_hours" class="pure-input-1" type="number" name="hourly_vibrate_to_hours" min="0" max="23" value="20" required>
+								</div>
+							</div>
+							<div class="pure-u-3-4">
+								<div class="l-box">
+									<input class="pure-input-1" type="range" min="0" max="23" data-exclude>
+								</div>
+							</div>
+						</div>
 					</div>
 				</fieldset>
 				<div class="buttons">
