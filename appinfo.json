@@ -3,8 +3,10 @@
         "colours_inverted": 0,
         "date_format": 1,
         "battery_hide_interval": 2,
-        "hourly_vibrate_interval": 3,
-        "bluetooth_vibrate": 4
+        "bluetooth_vibrate": 3,
+        "hourly_vibrate_interval": 4,
+        "hourly_vibrate_from_hours": 5,
+        "hourly_vibrate_to_hours": 6
     },
     "capabilities": [
         "configurable"
@@ -55,7 +57,7 @@
 	"embedded": false,
 	"debug": false,
 	"url": "https://rawgithub.com/renjithis/BitFace/master/config/autoconfig.html",
-	"description": "Configure your <strong>BitFace WatchFace</strong>",
+	"description": "Configure your <strong>Bit Face WatchFace</strong>",
 	"items": [
 		{
 		    "name": "colours_inverted",
@@ -93,23 +95,41 @@
 		    "default": 10
 	    },
 	    {
-		    "name": "hourly_vibrate_interval",
-		    "title": "Vibrate every hour",
-		    "description": "Give -1 to not to vibrate",
-		    "type": "integer",
-		    "min": -1,
-		    "max": 10,
-		    "default": 1
-	    },
-	    {
 		    "name": "bluetooth_vibrate",
 		    "title": "Vibrate on bluetooth disconnect",
-		    "description": "Vibrates when Pebble gets disconnected from ohone",
+		    "description": "Vibrates when Pebble gets disconnected from phone",
 		    "type": "boolean",
 		    "off-text": "No",
 		    "on-text": "Yes",
 		    "default": false
-		}
+		},
+	    {
+		    "name": "hourly_vibrate_interval",
+		    "title": "Vibrate every hour",
+		    "description": "Give 0 to not to vibrate",
+		    "type": "integer",
+		    "min": 0,
+		    "max": 10,
+		    "default": 1
+	    },
+	    {
+		    "name": "hourly_vibrate_from_hours",
+		    "title": "Hourly vibration start time",
+		    "description": "When to start hourly vibration (hour)",
+		    "type": "integer",
+		    "min": 0,
+		    "max": 23,
+		    "default": 8
+	    },
+	    {
+		    "name": "hourly_vibrate_to_hours",
+		    "title": "Hourly vibration stop time",
+		    "description": "When to stop hourly vibration (hour)",
+		    "type": "integer",
+		    "min": 0,
+		    "max": 23,
+		    "default": 20
+	    }
 	]
     }
 }

@@ -271,15 +271,19 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 	strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
 	text_layer_set_text(date_layer, date_text);
 	
-	static int last_vibrated_hour;
+	//static int last_vibrated_hour;
 	
-	if((int)getHourly_vibrate_interval()>0 && \
-	tick_time->tm_min == 0 && \
-	tick_time->tm_hour % (int)getHourly_vibrate_interval() == 0 && \
-	tick_time->tm_hour != last_vibrated_hour) {
-		last_vibrated_hour=tick_time->tm_hour;
-		vibes_short_pulse();
-	}
+	config current_config=get_current_config();
+	
+	if(current_config.hourly_vibrate_interval>0)
+		if(tick_time->tm_hour >= current_config.hourly_vibrate_start_hour && \
+		tick_time->tm_hour <= current_config.hourly_vibrate_stop_hour && \
+		tick_time->tm_min == 0)
+		//tick_time->tm_hour != last_vibrated_hour)
+			if(tick_time->tm_hour % current_config.hourly_vibrate_interval == 0) {
+				//last_vibrated_hour=tick_time->tm_hour;
+				vibes_short_pulse();
+			}
 }
 
 
@@ -293,8 +297,12 @@ void show_bluetooth_disconnected() {
 
 
 void hide_bluetooth_disconnected() {
+	if(bluetooth_disconnected_layer==NULL)
+		return;
+	
 	layer_remove_from_parent(bluetooth_disconnected_layer);
 	layer_destroy(bluetooth_disconnected_layer);
+	bluetooth_disconnected_layer=NULL;
 }
 
 
@@ -409,6 +417,7 @@ static void init(void) {
 	
 	if(getBluetooth_vibrate()) {
 		bluetooth_connection_service_subscribe(bt_handler);
+		bt_handler(bluetooth_connection_service_peek());
 	}
 		
 	/* Next : 

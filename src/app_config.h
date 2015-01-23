@@ -41,6 +41,8 @@ typedef struct  {
 	date_formatter date_fromat;
 	int battery_hide_seconds;
 	int hourly_vibrate_interval;
+	int hourly_vibrate_start_hour;
+	int hourly_vibrate_stop_hour;
 } config;
 
 typedef void (*config_changed_callback)(config);
@@ -107,6 +109,8 @@ config get_current_config() {
 	current_config.battery_hide_seconds=getBattery_hide_interval();
 	current_config.hourly_vibrate_interval=getHourly_vibrate_interval();
 	current_config.bluetooth_vibrate=getBluetooth_vibrate();
+	current_config.hourly_vibrate_start_hour=getHourly_vibrate_from_hours();
+	current_config.hourly_vibrate_stop_hour=getHourly_vibrate_to_hours();
 	
 	return current_config;
 }
