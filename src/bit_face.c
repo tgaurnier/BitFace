@@ -20,17 +20,14 @@
 
 
 #include <pebble.h>
-#include "app_config.h"
 
 Window *window;
 Layer *display_layer;
 TextLayer *date_layer;
 TextLayer *percent_layer;
-Layer *bluetooth_disconnected_layer;
 BitmapLayer *battery_layer;
 BitmapLayer *charge_layer;
 InverterLayer *battfill_layer;
-InverterLayer *inverter_layer;
 GBitmap *battery_outline;
 GBitmap *battery_charge;
 GFont font;
@@ -56,45 +53,8 @@ GFont font_tiny;
 #define HOURS_FIRST_DIGIT_MAX_ROWS		1 + clock_is_24h_style() // 2 rows if 24 hour time
 #define MINUTES_FIRST_DIGIT_MAX_ROWS	3
 
-// Forward declarations
-// TODO : forward declare all functions
-static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed);
-
 static char percent_str[] = "xxx%";
-AppTimer *battery_timer;
 
-static GPath *s_bt_path_ptr = NULL;
-static GPath *s_cross_path_prt = NULL;
-
-static const GPathInfo BT_PATH_INFO = {
-  .num_points = 6,
-  .points = (GPoint []) {{5, 0}, {12, 5}, {5, 9}, {12, 15}, {5, 20}, {5, 0}}
-};
-
-static const GPathInfo CROSS_PATH_INFO = {
-  .num_points = 4,
-  .points = (GPoint []) {{16, 0}, {0, 20}, {1, 20}, {17, 0}}
-};
-
-// .update_proc of my_layer:
-void my_layer_update_proc(Layer *my_layer, GContext* ctx) {
-	// Fill the path:
-	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_context_set_stroke_color(ctx, GColorBlack);
-	
-	gpath_draw_filled(ctx, s_bt_path_ptr);
-	gpath_draw_outline(ctx, s_bt_path_ptr);
-	gpath_draw_filled(ctx, s_cross_path_prt);
-	gpath_draw_outline(ctx, s_cross_path_prt);
-  
-}
-
-void setup_bt_path(void) {
-  s_bt_path_ptr = gpath_create(&BT_PATH_INFO);
-  s_cross_path_prt = gpath_create(&CROSS_PATH_INFO);
-  // Translate by (5, 5):
-  gpath_move_to(s_bt_path_ptr, GPoint(2, 0));
-}
 
 static void draw_cell(GContext* context, GPoint center, bool filled) {
 	// Each cell is a bit
@@ -185,20 +145,6 @@ static void display_layer_update_callback(Layer *me, GContext* context) {
 
 
 static void hide_battery() {
-	//Move date layer back to original position
-	// Set start and end
-	//GRect from_frame = layer_get_frame((Layer *)date_layer);
-	GRect to_frame = GRect(-10, 130, 154, 168-130);
-
-	// Create the animation
-	//PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
-
-	// Schedule to occur ASAP with default settings
-	//animation_schedule((Animation*) s_property_animation);
-	
-	layer_set_frame(text_layer_get_layer(date_layer), to_frame);
-	//layer_set_bounds(text_layer_get_layer(date_layer), GRect(0, 0, 144, 168-130));
-
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), true);
 	layer_set_hidden(text_layer_get_layer(percent_layer), true);
 	layer_set_hidden(inverter_layer_get_layer(battfill_layer), true);
@@ -206,28 +152,18 @@ static void hide_battery() {
 
 
 static void show_battery() {
-	// Move date layer a bit to the right so as not to hide the day
-	// Set start and end
-	//GRect from_frame = layer_get_frame((Layer *)date_layer);
-	GRect to_frame = GRect(0, 130, 164, 168-130); // increase width so that text is moved accordingly (since aligned to center) : ISSUE text not going back
-
-	// Create the animation
-	//PropertyAnimation *s_property_animation = property_animation_create_layer_frame((Layer *)date_layer, &from_frame, &to_frame);
-
-	// Schedule to occur ASAP with default settings
-	//animation_schedule((Animation*) s_property_animation);
-	
-	layer_set_frame(text_layer_get_layer(date_layer), to_frame);
-
 	layer_set_hidden(bitmap_layer_get_layer(battery_layer), false);
 	layer_set_hidden(text_layer_get_layer(percent_layer), false);
 	layer_set_hidden(inverter_layer_get_layer(battfill_layer), false);
 }
 
 
-static void set_battery(BatteryChargeState state) {	
-	// Set battery percent layer
-	snprintf(percent_str, sizeof(percent_str), "%d%%", (int)state.charge_percent);
+static void set_battery(BatteryChargeState state) {
+	// Set battery percent layer, account for bug where state.charge_percent never gets above 90
+	if(state.is_plugged && !state.is_charging && state.charge_percent == 90)
+		snprintf(percent_str, sizeof(percent_str), "100%%");
+	else
+		snprintf(percent_str, sizeof(percent_str), "%d%%", (int)state.charge_percent);
 	text_layer_set_text(percent_layer, percent_str);
 
 	// Set battery fill layer
@@ -245,102 +181,35 @@ static void set_battery(BatteryChargeState state) {
 	// Show or hide battery indicator
 	if(state.is_plugged || state.charge_percent <= 20)
 		show_battery();
-	else if((int)getBattery_hide_interval()!=100)
+	else
 		hide_battery();
 }
 
 
-void handle_battery_hide_timer(void *data) {
+static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
+	static uint8_t count = 1;
+	if(count == 1) {
+		layer_mark_dirty(display_layer);
+
+		static char date_text[] = "Xxxxxxxxx\n00/00/00";
+
+		strftime(date_text, sizeof(date_text), "%A\n%m/%d/%y", tick_time);
+		text_layer_set_text(date_layer, date_text);
+	}
+
+	else if(count == 5) {
 		BatteryChargeState state = battery_state_service_peek();
 		if(!(state.is_plugged || state.charge_percent <= 20))
 			hide_battery();
-		else
-			APP_LOG(APP_LOG_LEVEL_DEBUG,"Not hiding battery. either being changed or battery low");
-	// cancel the timer if not already done
-	//app_timer_cancel(battery_timer);	// causing error message in log : Timer ##### does not exist
-}
+	}
 
+	else if(count == 60)
+		count = 0;
 
-static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(display_layer);
-
-	static char date_text[] = "Xxxxxxxxx\n00/000/0000";
-
-	char date_fromatter[15];
-	get_date_formatter(date_fromatter);
-	strftime(date_text, sizeof(date_text), date_fromatter, tick_time);
-	text_layer_set_text(date_layer, date_text);
-	
-	//static int last_vibrated_hour;
-	
-	config current_config=get_current_config();
-	
-	if(current_config.hourly_vibrate_interval>0)
-		if(tick_time->tm_hour >= current_config.hourly_vibrate_start_hour && \
-		tick_time->tm_hour <= current_config.hourly_vibrate_stop_hour && \
-		tick_time->tm_min == 0)
-		//tick_time->tm_hour != last_vibrated_hour)
-			if(tick_time->tm_hour % current_config.hourly_vibrate_interval == 0) {
-				//last_vibrated_hour=tick_time->tm_hour;
-				vibes_short_pulse();
-			}
-}
-
-
-void show_bluetooth_disconnected() {
-	bluetooth_disconnected_layer = layer_create(GRect(124, 134, 20, 20));
-	setup_bt_path();
-	
-	layer_set_update_proc(bluetooth_disconnected_layer, my_layer_update_proc);
-	layer_add_child(window_get_root_layer(window), bluetooth_disconnected_layer);
-}
-
-
-void hide_bluetooth_disconnected() {
-	if(bluetooth_disconnected_layer==NULL)
-		return;
-	
-	layer_remove_from_parent(bluetooth_disconnected_layer);
-	layer_destroy(bluetooth_disconnected_layer);
-	bluetooth_disconnected_layer=NULL;
-}
-
-
-void bt_handler(bool connected) {
-  if (connected) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
-    hide_bluetooth_disconnected();
-  } else {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
-    show_bluetooth_disconnected();
-    vibes_short_pulse();
-  }
-}
-
-
-static void config_changed(config current_config) {
-	APP_LOG(APP_LOG_LEVEL_DEBUG,"Config changed. resetting");
-	APP_LOG(APP_LOG_LEVEL_DEBUG,"Current config :\n\tcolours_inverted=%d\n\tdate_fromat=%d\n\tbattery_hide_seconds=%d",	current_config.colours_inverted, current_config.date_fromat, current_config.battery_hide_seconds);
-
-	app_timer_cancel(battery_timer);
-
-	int battery_hide_seconds = current_config.battery_hide_seconds;
-
-	if(battery_hide_seconds>0)
-	  show_battery();
-	else			// workaround for autoconfig sending default values once and real values afterwords
-	  hide_battery();
-
-	if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
-		battery_timer=app_timer_register(battery_hide_seconds*1000, handle_battery_hide_timer, NULL);
-	
-	layer_set_hidden((Layer *)inverter_layer, !current_config.colours_inverted);
+	count++;
 }
 
 static void init(void) {
-	// Initialise config reading
-	config_init(config_changed);
-  
 	window = window_create();
 	window_stack_push(window, true);
 	window_set_background_color(window, GColorBlack);
@@ -358,9 +227,9 @@ static void init(void) {
 	layer_set_update_proc(display_layer, &display_layer_update_callback);
 	layer_add_child(root_layer, display_layer);
 
-	// Init layer for text. Workaround frame for allowing movement to show battery
+	// Init layer for text
 	date_layer = text_layer_create(frame);
-	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 164, 168-130));
+	layer_set_frame(text_layer_get_layer(date_layer), GRect(0, 130, 144, 168-130));
 	layer_set_bounds(text_layer_get_layer(date_layer), GRect(0, 0, 144, 168-130));
 	text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
 	text_layer_set_font(date_layer, font);
@@ -394,56 +263,21 @@ static void init(void) {
 	text_layer_set_text_alignment(percent_layer, GTextAlignmentCenter);
 	text_layer_set_font(percent_layer, font_tiny);
 	layer_add_child(root_layer, text_layer_get_layer(percent_layer));
-	
-	// Init layer to invert colours
-	inverter_layer = inverter_layer_create(frame);
-	layer_set_hidden((Layer *)inverter_layer, !getColours_inverted());
-	layer_add_child(root_layer, (Layer *)inverter_layer);
 
-	// Monitor charging and unplug
 	battery_state_service_subscribe(set_battery);
-	
-	int battery_hide_seconds = (int)getBattery_hide_interval();
-	if(battery_hide_seconds >0) {
-		// Show current battery level on watchface launch
-		set_battery(battery_state_service_peek());			
-		show_battery();
-		
-		if(battery_hide_seconds !=100)		// 100 = battery_hide_seconds maximum value in appinfo.json
-			battery_timer=app_timer_register(battery_hide_seconds*1000, handle_battery_hide_timer, NULL);
-	}
-		
-	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
-	
-	if(getBluetooth_vibrate()) {
-		bluetooth_connection_service_subscribe(bt_handler);
-		bt_handler(bluetooth_connection_service_peek());
-	}
-		
-	/* Next : 
-	 * Add hourly vibrate setting
-	 * Add Bluetooth disconnect vibrate setting. Add icon for it 😠
-	 * Battery show/hide slide animation
-	 * Check battery layer already hidden and do nothing if yes/no accordingly
-	 */
-	
-	/* Optimize :
-	 * Redundant frame setting of layers
-	 */
+	set_battery(battery_state_service_peek());
+	show_battery();
+
+	tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
 }
 
-
 static void deinit(void) {
-	config_deinit();
-	bluetooth_connection_service_unsubscribe();
-	app_timer_cancel(battery_timer);
 	layer_destroy(display_layer);
 	text_layer_destroy(date_layer);
 	text_layer_destroy(percent_layer);
 	bitmap_layer_destroy(battery_layer);
 	bitmap_layer_destroy(charge_layer);
 	inverter_layer_destroy(battfill_layer);
-	inverter_layer_destroy(inverter_layer);
 	fonts_unload_custom_font(font);
 	fonts_unload_custom_font(font_tiny);
 	gbitmap_destroy(battery_outline);
