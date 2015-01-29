@@ -1,42 +1,135 @@
 {
-  "uuid": "90c900ff-ef3d-48b2-9d74-de30df867066",
-  "shortName": "Bit Face",
-  "longName": "Bit Face",
-  "companyName": "Tory Gaurnier",
-  "versionCode": 1,
-  "versionLabel": "1.0.1",
-  "watchapp": {
-    "watchface": true
-  },
-  "appKeys": {},
-  "resources": {
-    "media": [
+    "appKeys": {
+        "colours_inverted": 0,
+        "date_format": 1,
+        "battery_hide_interval": 2,
+        "bluetooth_vibrate": 3,
+        "hourly_vibrate_interval": 4,
+        "hourly_vibrate_from_hours": 5,
+        "hourly_vibrate_to_hours": 6
+    },
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "Tory Gaurnier & Renjith I S",
+    "longName": "Bit Face",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/battery_outline.png",
+                "name": "BATTERY_OUTLINE",
+                "type": "png"
+            },
+            {
+                "file": "images/battery_charge.png",
+                "name": "BATTERY_CHARGE",
+                "type": "png"
+            },
+            {
+                "file": "fonts/Ubuntu-B.ttf",
+                "name": "FONT_16",
+                "type": "font"
+            },
+            {
+                "file": "fonts/Ubuntu-B.ttf",
+                "name": "FONT_10",
+                "type": "font"
+            },
+            {
+                "file": "images/menu_icon_binary_watch.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
+                "type": "png"
+            }
+        ]
+    },
+    "shortName": "Bit Face",
+    "uuid": "90c900ff-ef3d-48b2-9d74-de30df867066",
+    "versionCode": 1,
+    "versionLabel": "1.1",
+    "watchapp": {
+        "watchface": true
+    },
+    
+    
+    "preferences": {
+	"embedded": false,
+	"debug": false,
+	"url": "https://rawgithub.com/renjithis/BitFace/master/config/autoconfig.html",
+	"description": "Configure your <strong>Bit Face WatchFace</strong>",
+	"items": [
 		{
-			"menuIcon": true,
-			"name": "IMAGE_MENU_ICON",
-			"type": "png",
-			"file": "images/menu_icon_binary_watch.png"
+		    "name": "colours_inverted",
+		    "title": "Invert Colours",
+		    "description": "Inverted : Background = white and Foreground (Text and drawings) = black",
+		    "type": "boolean",
+		    "off-text": "No",
+		    "on-text": "Yes",
+		    "default": false
 		},
 		{
-			"name": "BATTERY_OUTLINE",
-			"type": "png",
-			"file": "images/battery_outline.png"
+		    "name": "date_format",
+		    "title": "Date format",
+		    "description": "Date format to use for the date at the bottom",
+		    "type": "enum",
+		    "choices": {
+		      "dmyyyy" : "31/01/2015 (1/2 digit day)",
+		      "ddmmyyyy" : "31/01/2015 (2 digit day)",
+		      "dmmm" : "31 Jan",
+		      "dmmmyyyy" : "31 Jan 2015",
+		      "mmmd" : "Jan 31",
+		      "mmmdyyyy" : "Jan 31 2015",
+		      "mdyyyy" : "01/31/2015 (1/2 digit day)",
+		      "mmddyyyy" : "01/31/2015 (2 digit day)"
+		    },
+		    "default": 1
 		},
 		{
-			"name": "BATTERY_CHARGE",
-			"type": "png",
-			"file": "images/battery_charge.png"
+		    "name": "battery_hide_interval",
+		    "title": "Battery hide interval in seconds",
+		    "description": "Give -1 to not to show battery indicator and 100 to not to hide it",
+		    "type": "integer",
+		    "min": -1,
+		    "max": 100,
+		    "default": 10
+	    },
+	    {
+		    "name": "bluetooth_vibrate",
+		    "title": "Vibrate on bluetooth disconnect",
+		    "description": "Vibrates when Pebble gets disconnected from phone",
+		    "type": "boolean",
+		    "off-text": "No",
+		    "on-text": "Yes",
+		    "default": false
 		},
-		{
-			"name": "FONT_16",
-			"type": "font",
-			"file": "fonts/Ubuntu-B.ttf"
-		},
-		{
-			"name": "FONT_10",
-			"type": "font",
-			"file": "fonts/Ubuntu-B.ttf"
-		}
-    ]
-  }
+	    {
+		    "name": "hourly_vibrate_interval",
+		    "title": "Vibrate every hour",
+		    "description": "Give 0 to not to vibrate",
+		    "type": "integer",
+		    "min": 0,
+		    "max": 10,
+		    "default": 1
+	    },
+	    {
+		    "name": "hourly_vibrate_from_hours",
+		    "title": "Hourly vibration start time",
+		    "description": "When to start hourly vibration (hour)",
+		    "type": "integer",
+		    "min": 0,
+		    "max": 23,
+		    "default": 8
+	    },
+	    {
+		    "name": "hourly_vibrate_to_hours",
+		    "title": "Hourly vibration stop time",
+		    "description": "When to stop hourly vibration (hour)",
+		    "type": "integer",
+		    "min": 0,
+		    "max": 23,
+		    "default": 20
+	    }
+	]
+    }
 }
